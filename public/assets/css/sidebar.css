@@ -1,0 +1,166 @@
+/* ================================
+   SIDEBAR COMMUNE
+================================ */
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    width: 255px;
+    height: 100vh;
+
+    background: #111827;
+    color: #ffffff;
+
+    z-index: 1000;
+    overflow-y: auto;
+
+    display: flex;
+    flex-direction: column;
+
+    padding: 28px 16px;
+}
+
+
+/* ================================
+   MENU
+================================ */
+
+.sidebar-brand {
+    display: none;
+}
+
+.sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+
+    padding: 0;
+
+    flex: 1;
+}
+
+.sidebar-item {
+    display: flex;
+    align-items: center;
+
+    gap: 14px;
+
+    width: 100%;
+
+    padding: 13px 14px;
+
+    border-radius: 10px;
+
+    color: #9ca3af;
+
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: 400;
+
+    transition: 0.2s ease;
+}
+
+.sidebar-item i {
+    width: 20px;
+    min-width: 20px;
+
+    text-align: center;
+    font-size: 14px;
+}
+
+.sidebar-item:hover {
+    background: rgba(255,255,255,0.06);
+    color: #ffffff;
+}
+
+.sidebar-item.active {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+
+/* ================================
+   TOPBAR DES AUTRES PAGES
+================================ */
+
+.topbar {
+    margin-left: 255px;
+
+    height: 90px;
+
+    background: #ffffff;
+
+    border-bottom: 1px solid #e7ebf2;
+
+    padding: 0 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+
+/* ================================
+   CONTENU DES AUTRES PAGES
+================================ */
+
+main.container {
+    margin-left: 255px;
+
+    width: auto;
+
+    max-width: none;
+
+    margin-right: 0;
+
+    margin-top: 35px;
+
+    padding: 0 38px 50px;
+}
+
+
+/* ================================
+   BOUTONS / CONTENU
+================================ */
+
+.container {
+    box-sizing: border-box;
+}
+
+
+/* ================================
+   RESPONSIVE
+================================ */
+
+@media (max-width: 768px) {
+
+    .sidebar {
+        width: 75px;
+        padding: 20px 10px;
+    }
+
+    .sidebar-item {
+        justify-content: center;
+    }
+
+    .sidebar-item span {
+        display: none;
+    }
+
+    .sidebar-item {
+        gap: 0;
+    }
+
+    .topbar {
+        margin-left: 75px;
+        padding: 0 20px;
+    }
+
+    main.container {
+        margin-left: 75px;
+        padding: 0 20px 40px;
+    }
+}
