@@ -14,15 +14,47 @@ class Inscriptions extends BaseController
     {
         $model = new Inscription();
 
-        $inscriptions = $model
-            ->select('inscriptions.*, etudiants.matricule, etudiants.nom, etudiants.prenom, formations.code, formations.nom AS formation_nom')
-            ->join('etudiants', 'etudiants.id = inscriptions.etudiant_id')
-            ->join('formations', 'formations.id = inscriptions.formation_id')
+        $search = trim($this->request->getGet('q') ?? '');
+
+        $builder = $model
+            ->select(
+                'inscriptions.*,
+                etudiants.matricule,
+                etudiants.nom,
+                etudiants.prenom,
+                formations.code,
+                formations.nom AS formation_nom'
+            )
+            ->join(
+                'etudiants',
+                'etudiants.id = inscriptions.etudiant_id'
+            )
+            ->join(
+                'formations',
+                'formations.id = inscriptions.formation_id'
+            );
+
+        if ($search !== '') {
+
+            $builder
+                ->groupStart()
+                ->like('etudiants.matricule', $search)
+                ->orLike('etudiants.nom', $search)
+                ->orLike('etudiants.prenom', $search)
+                ->orLike('formations.code', $search)
+                ->orLike('formations.nom', $search)
+                ->orLike('inscriptions.annee_academique', $search)
+                ->orLike('inscriptions.statut', $search)
+                ->groupEnd();
+        }
+
+        $inscriptions = $builder
             ->orderBy('inscriptions.id', 'DESC')
             ->findAll();
 
         return view('inscriptions/index', [
-            'inscriptions' => $inscriptions
+            'inscriptions' => $inscriptions,
+            'search'       => $search,
         ]);
     }
 
@@ -32,8 +64,13 @@ class Inscriptions extends BaseController
         $formationModel = new Formation();
 
         return view('inscriptions/create', [
-            'etudiants' => $etudiantModel->orderBy('nom', 'ASC')->findAll(),
-            'formations' => $formationModel->orderBy('nom', 'ASC')->findAll(),
+            'etudiants' => $etudiantModel
+                ->orderBy('nom', 'ASC')
+                ->findAll(),
+
+            'formations' => $formationModel
+                ->orderBy('nom', 'ASC')
+                ->findAll(),
         ]);
     }
 
@@ -50,6 +87,7 @@ class Inscriptions extends BaseController
         ];
 
         if (!$this->validate($rules)) {
+
             return redirect()->back()
                 ->withInput()
                 ->with('errors', $this->validator->getErrors());
@@ -74,6 +112,7 @@ class Inscriptions extends BaseController
         $inscription = $model->find($id);
 
         if (!$inscription) {
+
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound(
                 'Inscription introuvable.'
             );
@@ -81,8 +120,13 @@ class Inscriptions extends BaseController
 
         return view('inscriptions/edit', [
             'inscription' => $inscription,
-            'etudiants'   => (new Etudiant())->orderBy('nom', 'ASC')->findAll(),
-            'formations'  => (new Formation())->orderBy('nom', 'ASC')->findAll(),
+            'etudiants'   => (new Etudiant())
+                ->orderBy('nom', 'ASC')
+                ->findAll(),
+
+            'formations'  => (new Formation())
+                ->orderBy('nom', 'ASC')
+                ->findAll(),
         ]);
     }
 
@@ -91,6 +135,7 @@ class Inscriptions extends BaseController
         $model = new Inscription();
 
         if (!$model->find($id)) {
+
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound(
                 'Inscription introuvable.'
             );
@@ -105,6 +150,7 @@ class Inscriptions extends BaseController
         ];
 
         if (!$this->validate($rules)) {
+
             return redirect()->back()
                 ->withInput()
                 ->with('errors', $this->validator->getErrors());
@@ -127,6 +173,7 @@ class Inscriptions extends BaseController
         $model = new Inscription();
 
         if (!$model->find($id)) {
+
             return redirect()->to('/inscriptions')
                 ->with('error', 'Inscription introuvable.');
         }

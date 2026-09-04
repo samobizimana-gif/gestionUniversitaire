@@ -141,6 +141,128 @@
 
 
         /* =====================================================
+           MODALE DE SUPPRESSION
+        ===================================================== */
+
+        .delete-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 5000;
+            padding: 20px;
+        }
+
+        .delete-modal-overlay.active {
+            display: flex;
+        }
+
+        .delete-modal {
+            width: 100%;
+            max-width: 430px;
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.20);
+            padding: 30px;
+            animation: modalAppear 0.2s ease;
+        }
+
+        @keyframes modalAppear {
+
+            from {
+                opacity: 0;
+                transform: translateY(-15px) scale(0.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+
+        }
+
+        .delete-modal-icon {
+            width: 58px;
+            height: 58px;
+            border-radius: 16px;
+            background: #fff1f2;
+            color: #e11d48;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin: 0 auto 20px;
+        }
+
+        .delete-modal-content {
+            text-align: center;
+        }
+
+        .delete-modal-content h2 {
+            margin: 0 0 10px;
+            font-size: 20px;
+            color: var(--text);
+        }
+
+        .delete-modal-content p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .delete-modal-content strong {
+            color: var(--text);
+        }
+
+        .delete-modal-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .delete-modal-button {
+            border: none;
+            padding: 11px 18px;
+            border-radius: 9px;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            transition: 0.2s ease;
+        }
+
+        .delete-cancel-button {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .delete-cancel-button:hover {
+            background: #e2e8f0;
+        }
+
+        .delete-confirm-button {
+            background: #e11d48;
+            color: white;
+        }
+
+        .delete-confirm-button:hover {
+            background: #be123c;
+            transform: translateY(-1px);
+        }
+
+
+        /* =====================================================
            RESPONSIVE
         ===================================================== */
 
@@ -168,6 +290,18 @@
             .main {
                 margin-left: 75px !important;
                 width: calc(100% - 75px) !important;
+            }
+
+            .delete-modal {
+                padding: 25px 20px;
+            }
+
+            .delete-modal-actions {
+                flex-direction: column-reverse;
+            }
+
+            .delete-modal-button {
+                width: 100%;
             }
 
         }
@@ -841,6 +975,8 @@
                                             gap:7px;
                                         ">
 
+                                            <!-- MODIFIER -->
+
                                             <a
                                                 href="<?= base_url('etudiants/edit/' . $etudiant['id']) ?>"
                                                 style="
@@ -864,8 +1000,13 @@
                                             </a>
 
 
+                                            <!-- SUPPRIMER -->
+
                                             <a
-                                                href="<?= base_url('etudiants/delete/' . $etudiant['id']) ?>"
+                                                href="#"
+                                                class="delete-student-button"
+                                                data-id="<?= esc($etudiant['id']) ?>"
+                                                data-name="<?= esc($etudiant['nom'] . ' ' . $etudiant['prenom']) ?>"
                                                 style="
                                                     display:inline-flex;
                                                     align-items:center;
@@ -878,7 +1019,6 @@
                                                     font-weight:600;
                                                     text-decoration:none;
                                                 "
-                                                onclick="return confirm('Voulez-vous vraiment supprimer cet étudiant ?');"
                                             >
 
                                                 <i class="fa-solid fa-trash"></i>
@@ -997,25 +1137,196 @@
 
 
 <!-- =====================================================
-     RECHERCHE
+     MODALE DE CONFIRMATION DE SUPPRESSION
+===================================================== -->
+
+<div
+    id="deleteModal"
+    class="delete-modal-overlay"
+>
+
+    <div class="delete-modal">
+
+        <div class="delete-modal-icon">
+
+            <i class="fa-solid fa-triangle-exclamation"></i>
+
+        </div>
+
+
+        <div class="delete-modal-content">
+
+            <h2>
+                Confirmer la suppression
+            </h2>
+
+
+            <p>
+                Voulez-vous vraiment supprimer l'étudiant
+                <strong id="deleteStudentName"></strong> ?
+                <br>
+                Cette action est irréversible.
+            </p>
+
+        </div>
+
+
+        <div class="delete-modal-actions">
+
+            <button
+                type="button"
+                id="cancelDelete"
+                class="delete-modal-button delete-cancel-button"
+            >
+
+                <i class="fa-solid fa-xmark"></i>
+
+                Annuler
+
+            </button>
+
+
+            <a
+                href="#"
+                id="confirmDelete"
+                class="delete-modal-button delete-confirm-button"
+            >
+
+                <i class="fa-solid fa-trash"></i>
+
+                Supprimer
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     RECHERCHE + MODALE
 ===================================================== -->
 
 <script>
 
-const search = document.getElementById('search');
+document.addEventListener('DOMContentLoaded', function () {
 
-search.addEventListener('keyup', function () {
+    /* =====================================================
+       RECHERCHE AUTOMATIQUE
+    ===================================================== */
 
-    const value = this.value.toLowerCase();
+    const search = document.getElementById('search');
 
-    const rows = document.querySelectorAll('#studentTable tr');
+    if (search) {
 
-    rows.forEach(function (row) {
+        search.addEventListener('keyup', function () {
 
-        const text = row.textContent.toLowerCase();
+            const value = this.value.toLowerCase();
 
-        row.style.display =
-            text.includes(value) ? '' : 'none';
+            const rows = document.querySelectorAll('#studentTable tr');
+
+            rows.forEach(function (row) {
+
+                const text = row.textContent.toLowerCase();
+
+                row.style.display =
+                    text.includes(value) ? '' : 'none';
+
+            });
+
+        });
+
+    }
+
+
+    /* =====================================================
+       MODALE DE SUPPRESSION
+    ===================================================== */
+
+    const deleteModal = document.getElementById('deleteModal');
+
+    const deleteStudentName =
+        document.getElementById('deleteStudentName');
+
+    const confirmDelete =
+        document.getElementById('confirmDelete');
+
+    const cancelDelete =
+        document.getElementById('cancelDelete');
+
+    const deleteButtons =
+        document.querySelectorAll('.delete-student-button');
+
+
+    /* OUVRIR LA MODALE */
+
+    deleteButtons.forEach(function (button) {
+
+        button.addEventListener('click', function (event) {
+
+            event.preventDefault();
+
+            const studentId =
+                this.getAttribute('data-id');
+
+            const studentName =
+                this.getAttribute('data-name');
+
+
+            deleteStudentName.textContent =
+                studentName;
+
+
+            confirmDelete.href =
+                "<?= base_url('etudiants/delete') ?>/" + studentId;
+
+
+            deleteModal.classList.add('active');
+
+        });
+
+    });
+
+
+    /* ANNULER */
+
+    cancelDelete.addEventListener('click', function () {
+
+        deleteModal.classList.remove('active');
+
+        confirmDelete.href = '#';
+
+    });
+
+
+    /* CLIQUER EN DEHORS DE LA FENÊTRE */
+
+    deleteModal.addEventListener('click', function (event) {
+
+        if (event.target === deleteModal) {
+
+            deleteModal.classList.remove('active');
+
+            confirmDelete.href = '#';
+
+        }
+
+    });
+
+
+    /* TOUCHE ESC */
+
+    document.addEventListener('keydown', function (event) {
+
+        if (event.key === 'Escape') {
+
+            deleteModal.classList.remove('active');
+
+            confirmDelete.href = '#';
+
+        }
 
     });
 

@@ -12,11 +12,28 @@ class Formations extends BaseController
     {
         $model = new Formation();
 
-        $data = [
-            'formations' => $model->orderBy('id', 'DESC')->findAll(),
-        ];
+        $search = trim($this->request->getGet('q') ?? '');
 
-        return view('formations/index', $data);
+        $builder = $model;
+
+        if ($search !== '') {
+            $builder = $model
+                ->groupStart()
+                ->like('code', $search)
+                ->orLike('nom', $search)
+                ->orLike('niveau', $search)
+                ->orLike('description', $search)
+                ->groupEnd();
+        }
+
+        $formations = $builder
+            ->orderBy('id', 'DESC')
+            ->findAll();
+
+        return view('formations/index', [
+            'formations' => $formations,
+            'search'     => $search,
+        ]);
     }
 
     public function create()

@@ -120,7 +120,7 @@
                         <span class="welcome-label">Bienvenue 👋</span>
 
                         <h2>
-                            Bonjour, Administrateur
+                            Bonjour, Admin
                         </h2>
 
                         <p>
